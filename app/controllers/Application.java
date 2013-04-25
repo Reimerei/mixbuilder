@@ -1,5 +1,6 @@
 package controllers;
 
+import models.Track;
 import play.*;
 import play.db.DB;
 import play.mvc.*;
@@ -14,7 +15,14 @@ import java.util.ArrayList;
 
 public class Application extends Controller {
 
-    public static Result index() throws SQLException {
+    public static Result index() throws SQLException
+    {
+        Track t = new Track();
+
+        t.artist = "boss";
+        t.trackName = "song";
+
+        t.save();
 
         return ok( index.render("X"));
     }
