@@ -16,7 +16,7 @@ public class Application extends Controller {
 
     public static Result index() throws SQLException {
 
-        return ok( index.render("D"));
+        return ok( index.render("X"));
     }
 
     public static Result showColumn(String columnNr) throws SQLException
