@@ -1,0 +1,9 @@
+@(column: List[String])
+
+@main("Title") {
+
+    @for(field <- column) {
+    <li>@field</li>
+    }
+
+}
