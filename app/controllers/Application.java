@@ -14,7 +14,6 @@ public class Application extends Controller {
 
         Connection c = DB.getConnection("mixbuilder");
 
-        return ok(index.render("D"));
+        return ok( index.render("D"));
     }
-
 }
