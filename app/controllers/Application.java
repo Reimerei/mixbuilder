@@ -32,7 +32,7 @@ public class Application extends Controller {
         {
             column.add(rs.getString(Integer.parseInt(columnNr)));
         }
-        return ok(showColumn.render(column));
 
+        return ok(showColumn.render(column));
     }
 }
