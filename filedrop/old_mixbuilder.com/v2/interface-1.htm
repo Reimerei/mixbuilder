@@ -1,0 +1,344 @@
+<html>
+
+<head>
+
+<script type="text/javascript">
+function getMix(str)
+{
+if (str.length==0)
+  {
+  document.getElementById("txtHint").innerHTML="";
+  return;
+  }
+if (window.XMLHttpRequest)
+  {// code for IE7+, Firefox, Chrome, Opera, Safari
+  xmlhttp=new XMLHttpRequest();
+  }
+else
+  {// code for IE6, IE5
+  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+xmlhttp.onreadystatechange=function()
+  {
+  if (xmlhttp.readyState==4 && xmlhttp.status==200)
+    {
+    document.getElementById("displayMixes").innerHTML=xmlhttp.responseText;
+    }
+  }
+xmlhttp.open("POST","get_mixes.htm",true);
+xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+xmlhttp.send("from="+str);
+}
+</script>
+
+<script type="text/javascript">
+function getReleases(str, artist, trackname)
+{
+if (str.length==0)
+  {
+  document.getElementById("txtHint").innerHTML="";
+  return;
+  }
+if (window.XMLHttpRequest)
+  {// code for IE7+, Firefox, Chrome, Opera, Safari
+  xmlhttp=new XMLHttpRequest();
+  }
+else
+  {// code for IE6, IE5
+  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+xmlhttp.onreadystatechange=function()
+  {
+  if (xmlhttp.readyState==4 && xmlhttp.status==200)
+    {
+    document.getElementById("displayMixes").innerHTML=xmlhttp.responseText;
+    }
+  }
+xmlhttp.open("POST","get_mixes.htm",true);
+xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+xmlhttp.send("from="+artist);
+}
+</script>
+
+
+<script type="text/javascript">
+function printToDiv(divid, str){
+document.getElementById(divid).innerHTML=str;
+}
+</script>
+
+</head>
+
+
+<body bgcolor=grey>
+
+<center>
+<table border=2 bgcolor=grey>
+<tr><td align=center>
+<p>&nbsp;
+<p>--------------------------------------------------------------------------------------------------------------------
+
+<?php
+//parameters
+//max number of rows per sql select
+$maxNumRowsSqlSelect=50;
+
+//get connection
+$con = mysql_connect("fdb3.awardspace.com","558585_mix","shifter");
+if (!$con)
+  {
+  die('Could not connect: ' . mysql_error());
+  }
+
+//operations
+mysql_select_db("558585_mix", $con);
+
+
+echo "<table border=1><tr><td>";
+echo "<p>";
+
+echo "<br />";
+
+//-----------------------------------------------------------------------------------
+//TESTING
+/*
+$in_id=1;
+
+
+$row=getTuneInfo($con, $in_id);
+echo $row['track_artist'] . " - " . $row['track_name'];
+echo "<br />";
+
+$mixes=getMixesForTune($con, $in_id);
+
+
+foreach ($mixes as $oneId)
+{	
+	$row=getTuneInfo($con, $oneId);
+	echo "--> " . $row['track_artist'] . " - " . $row['track_name'];
+	echo "<br />";
+}
+*/
+
+drawTuneSelectFormMix($con, $maxNumRowsSqlSelect);
+drawGetMixesForm($con);
+
+//drawTuneSelectForm($con, $maxNumRowsSqlSelect);
+//drawTuneSearchInterface($con);
+echo "<div id='displayMixes'>mixes will be listed here...</div>";
+
+echo "<br />";
+echo "<p>testin...";
+
+echo "<button type='button' onClick=printToDiv('displayMixes','...')>Clear</button>";
+
+
+
+//##################################################################################################
+//NEW FUNCTIONS
+
+function drawTuneSearchInterface($con){
+//draws tune search form
+
+echo "<form>";
+echo "<input type='text' name='livetest4' onkeyup=getReleases(this.value,this.value,-1)>";
+echo "<input type='text' name='livetest' onkeyup=getMix(this.value)>";
+echo "</form>";
+
+}
+
+function getSearchResultsAsHtmlTable($con, $in_searchPhrase){
+//------------------------------------------
+	//fetch limit
+        $sql_fetchRowsLimit=20;
+
+        //set which order to get tunes in
+        $sql_tunesOrderBy="artist";
+
+	//resulting string
+	$result="";
+
+	$result=result . "PRINT SEARCH RES TEST";
+
+	$sql_query="select * from tunes where track_artist like '$in_searchPhrase%' order by $sql_tunesOrderBy limit $sql_fetchRowsLimit";
+//	$sql_query="select * from tunes where id = $in_searchPhrase order by $sql_tunesOrderBy limit $sql_fetchRowsLimit";
+
+        //get result set of tunes
+        $tunes=getSqlQueryRes($con, $sql_query);
+
+        //draw table
+        $result=result . "<table border=1>";
+        
+        //loop through result set
+        while($cRow = mysql_fetch_array($tunes))
+        {       
+                $cTuneId=$cRow['id'];
+
+                //print info for testing
+                $result=result .  "<tr><td>";
+                $result=result .  "<p font>" . $cTuneId . " : " . $cRow['track_artist'] . " - " . $cRow['track_name'] . "</p>";
+                $result=result .  "</td></tr>";
+        }
+
+        $result=result .  "</table>";
+	
+	return result;
+}
+
+function getSqlQueryRes($con, $in_sqlQuery){
+//get tunes info from db as array with column names
+        $result = mysql_query($in_sqlQuery,$con);
+        return $result;
+}
+
+
+//##################################################################################################
+//function to draw tune select form
+function drawTuneSelectForm($con, $in_maxNumRowsSqlSelect){
+
+	//create form box
+
+	$formstart="<form action=''>";
+	$formend="</form>";
+	//form start
+	echo $formstart;
+	//form content
+	//FROM
+	echo "<select name='from' onchange='getMix(this.value)'>";
+	//get all tune ids
+	$allTuneIds=getAllTuneIds($con);
+	//loop through tune ids
+	foreach ($allTuneIds as $oneId)
+	{
+		$row=getTuneInfo($con, $oneId);
+		//create form input entry
+		echo "<option value=" . $oneId . ">" . $row['track_artist'] . " - " . $row['track_name'] . "</option>";
+	}
+	echo "</select>";
+	//form end
+	echo $formend;
+
+
+
+}
+
+
+function getTunesOrderBySql($con, $in_sqlOrderBy, $in_maxNumRowsSqlSelect){
+//get tunes info from db as array with column names
+	$result = mysql_query("select * from tunes order by $in_sqlOrderBy limit $in_maxNumRowsSqlSelect",$con);
+	return $result;
+}
+
+
+//--------------------------------------------------------------------------------"---
+//OLD FUNCTIONS
+//funciton to draw html form to insert new mix -- OLD
+function drawTuneSelectFormMix($con){
+	$formstart="<form action='add_mix.php' method='post'>";
+	$formend="<input type='submit' value='add mix'/></form>";
+	//form start
+	echo $formstart;
+	//form content
+	//MIX FROM TUNE
+	echo "<select name='from'>";
+	//get all tune ids
+	$allTuneIds=getAllTuneIds($con);
+	//loop through tune ids
+	foreach ($allTuneIds as $oneId)
+	{
+		$row=getTuneInfo($con, $oneId);
+		//create form input entry
+		echo "<option value=" . $oneId . ">" . $row['track_artist'] . " - " . $row['track_name'] . "</option>";
+	}
+	echo "</select>";
+	//MIX TO TUNE
+	echo "<select name='to'>";
+	//get all tune ids
+	$allTuneIds=getAllTuneIds($con);
+	//loop through tune ids
+	foreach ($allTuneIds as $oneId)
+	{
+		$row=getTuneInfo($con, $oneId);
+		//create form input entry
+		echo "<option value=" . $oneId . ">" . $row['track_artist'] . " - " . $row['track_name'] . "</option>";
+	}
+	echo "</select>";
+	//form end
+	echo $formend;
+}
+
+
+function drawGetMixesForm($con){
+//draw html form to select one tune and get mixes for it
+	$formstart="<form action=''>";
+	$formend="</form>";
+	//form start
+	echo $formstart;
+	//form content
+	//FROM
+	echo "<select name='from' onchange='getMix(this.value)'>";
+	//get all tune ids
+	$allTuneIds=getAllTuneIds($con);
+	//loop through tune ids
+	foreach ($allTuneIds as $oneId)
+	{
+		$row=getTuneInfo($con, $oneId);
+		//create form input entry
+		echo "<option value=" . $oneId . ">" . $row['track_artist'] . " - " . $row['track_name'] . "</option>";
+	}
+	echo "</select>";
+	//form end
+	echo $formend;
+}
+
+function insertNewMix($con, $in_from, $in_to){
+//insert new mix record into db
+	mysql_query("insert into mixes values ($in_from, $in_to)",$con);
+}
+
+function getMixesForTune($con, $in_id){
+//get array of tune ids to mix from given tune
+	$result = mysql_query("select * from mixes where from_id=$in_id",$con);
+	$count=0;
+	$res;
+	while($row = mysql_fetch_array($result))
+	{
+		$res[$count]=$row['to_id'];
+		$count=$count+1;
+	}
+	return $res;
+}
+
+function getTuneInfo($con, $in_id){
+//get tune info from db as array with column names
+	$result = mysql_query("select * from tunes where id=$in_id",$con);
+	$res;
+	while($row = mysql_fetch_array($result))
+	{
+		$res=$row;
+	}
+	return $res;
+}
+
+function getAllTuneIds($con){
+//get array of tune ids to mix from given tune
+	$result = mysql_query("select id from tunes order by track_artist, track_name",$con);
+	$count=0;
+	$res;
+	while($row = mysql_fetch_array($result))
+	{	
+		$res[$count]=$row['id'];
+		$count=$count+1;
+		
+	}
+	return $res;
+}
+
+//close connection
+mysql_close($con);
+?> 
+
+</td></tr></table>
+</center>
+</body>
+</html> 

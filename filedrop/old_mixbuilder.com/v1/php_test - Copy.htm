@@ -1,0 +1,33 @@
+<html>
+<body>
+
+<?php
+//get connection
+$con = mysql_connect("fdb3.awardspace.com","558585_mix","shifter");
+if (!$con)
+  {
+  die('Could not connect: ' . mysql_error());
+  }
+
+
+//operations
+mysql_select_db("558585_mix", $con);
+
+
+$result = mysql_query("select * from tunes",$con);
+
+while($row = mysql_fetch_array($result))
+  {
+  echo $row['track_artist'] . $row['track_name'];
+  echo "<br />";
+  }
+
+//close connection
+mysql_close($con);
+?> 
+
+
+
+
+</body>
+</html> 

@@ -1,0 +1,87 @@
+<html>
+<body>
+
+<?php
+//get connection
+$con = mysql_connect("fdb3.awardspace.com","558585_mix","shifter");
+if (!$con)
+  {
+  die('Could not connect: ' . mysql_error());
+  }
+
+//operations
+mysql_select_db("558585_mix", $con);
+
+if($_POST[from]==-1){
+	$result = mysql_query("select distinct id from mixes, tunes where mixes.from_id=tunes.id order by track_artist",$con);
+
+	while($outerRow = mysql_fetch_array($result))
+	{
+		$from_id=$outerRow['id'];
+		$row=getTuneInfo($con, $from_id);
+		echo $row['track_artist'] . " - " . $row['track_name'];
+		echo "<br />";
+
+		$mixes=getMixesForTune($con, $from_id);
+
+		foreach ($mixes as $oneId)
+		{	
+			$row=getTuneInfo($con, $oneId);
+			echo "--> " . $row['track_artist'] . " - " . $row['track_name'];
+			echo "<br />";
+		}
+		echo "<br />";
+	}
+}
+else{
+	$from_id=$_POST[from];
+
+	$row=getTuneInfo($con, $from_id);
+	echo $row['track_artist'] . " - " . $row['track_name'];
+	echo "<br />";
+	
+	$mixes=getMixesForTune($con, $from_id);
+
+		foreach ($mixes as $oneId)
+		{	
+			$row=getTuneInfo($con, $oneId);
+			echo "--> " . $row['track_artist'] . " - " . $row['track_name'];
+			echo "<br />";
+		}
+		echo "<br />";
+}
+
+
+function getMixesForTune($con, $in_id){
+//get array of tune ids to mix from given tune
+	$result = mysql_query("select * from mixes where from_id=$in_id",$con);
+	$count=0;
+	$res;
+	while($row = mysql_fetch_array($result))
+	{
+		$res[$count]=$row['to_id'];
+		$count=$count+1;
+	}
+	return $res;
+}
+
+function getTuneInfo($con, $in_id){
+//get tune info from db as array with column names
+	$result = mysql_query("select * from tunes where id=$in_id",$con);
+	$res;
+	while($row = mysql_fetch_array($result))
+	{
+		$res=$row;
+	}
+	return $res;
+}
+
+//close connection
+mysql_close($con);
+?> 
+
+
+
+
+</body>
+</html> 

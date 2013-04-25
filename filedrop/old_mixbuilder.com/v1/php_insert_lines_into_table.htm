@@ -1,0 +1,46 @@
+<html>
+<body>
+
+<?php
+//get connection
+$con = mysql_connect("fdb3.awardspace.com","558585_mix","shifter");
+if (!$con)
+  {
+  die('Could not connect: ' . mysql_error());
+  }
+
+
+//operations
+mysql_select_db("558585_mix", $con);
+
+
+
+$file=fopen("dnb.csv","r");
+
+while(!feof($file))
+  {
+  $line=fgets($file);
+  echo $line . "<br />";
+	mysql_query("INSERT INTO tunes VALUES ($line)");
+  }
+fclose($file);
+
+
+
+$result = mysql_query("select count(*) as num from tunes",$con);
+
+while($row = mysql_fetch_array($result))
+  {
+  echo $row['num'];
+  echo "<br />";
+  }
+
+//close connection
+mysql_close($con);
+?> 
+
+
+
+
+</body>
+</html> 

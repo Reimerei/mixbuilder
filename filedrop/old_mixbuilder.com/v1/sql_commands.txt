@@ -1,0 +1,38 @@
+create table tunes 
+(id int primary key, 
+product_title varchar(500), 
+artist varchar(500), 
+label varchar(500), 
+cat_num varchar(500), 
+track_artist varchar(500), 
+track_name varchar(500), 
+track_key varchar(500), 
+track_bpm int);
+
+
+
+create table mixes (from_id int, to_id int, user_id int);
+
+
+
+
+
+
+
+
+
+
+
+--------------------------
+
+
+$result = mysql_query("select * from (select * from mixes where from_id=$in_id) as m, (select * from tunes where id=$in_id) as t where m.from_id=t.id",$con);
+	while($row = mysql_fetch_array($result))
+	{
+		$to_id=$row['to_id'];
+		$to_result = mysql_query("select * from tunes where id=$to_id",$con);
+		while($to_row = mysql_fetch_array($to_result)){
+			echo $row['track_artist'] . " - " . $row['track_name'] . " --> " . $to_row['track_artist'] . " - " . $to_row['track_name'];
+			echo "<br />";
+		}
+	}
