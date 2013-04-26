@@ -20,4 +20,6 @@ public class Track extends Model
     public String trackName;
 
     public String trackLength;
+
+    public static Finder<Long,Track> find = new Finder<Long,Track>(Long.class, Track.class);
 }
